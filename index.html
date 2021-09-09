@@ -4,8 +4,28 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>画板</title>
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    hi
+    <div id="canvas"></div>
+    <script>
+      canvas.onclick = (e) => {
+        console.log(e.clientX);
+        console.log(e.clientY);
+        //console.log调试大法
+        let div = document.createElement("div"); //div在内存
+        div.style.position = "absolute";
+        div.style.left = e.clientX + "px";
+        div.style.top = e.clientY + "px";
+        // div.style.border = "1px solid red";
+        div.style.width = "6px";
+        div.style.height = "6px";
+        div.style.marginLeft = "-3px"; //使点击的位置位于方框中间
+        div.style.marginTop = "-3px";
+        div.style.borderRadius = "50%";
+        div.style.backgroundColor = "black";
+        canvas.appendChild(div); //将div添加到画布，使小方框显现出来
+      };
+    </script>
   </body>
 </html>
