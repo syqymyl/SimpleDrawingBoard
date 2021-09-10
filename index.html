@@ -7,9 +7,9 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div id="canvas"></div>
+    <!-- <div id="canvas"></div>
     <script>
-      canvas.onclick = (e) => {
+      canvas.onmousemove = (e) => {
         console.log(e.clientX);
         console.log(e.clientY);
         //console.log调试大法
@@ -26,6 +26,44 @@
         div.style.backgroundColor = "black";
         canvas.appendChild(div); //将div添加到画布，使小方框显现出来
       };
+    </script> -->
+    <canvas id="canvas" width="300" height="150"></canvas>
+    <script>
+      let canvas = document.getElementById("canvas");
+      canvas.width = document.documentElement.clientWidth;
+      canvas.height = document.documentElement.clientHeight;
+      let ctx = canvas.getContext("2d");
+
+      let painting = false;
+
+      ctx.fillStyle = "red";
+      ctx.strokeStyle = "none";
+
+      canvas.onmousedown = () => {
+        //鼠标放下，可以开始画
+        painting = true;
+      };
+
+      canvas.onmousemove = (e) => {
+        if (painting === true) {
+          ctx.beginPath();
+          ctx.arc(e.clientX, e.clientY, 3, 0, 2 * Math.PI);
+          ctx.stroke();
+          ctx.fill();
+          // ctx.fillRect(e.clientX - 3, e.clientY - 3, 6, 6); //通过修改数据来判断该api功能
+        } else {
+          console.log("什么都不做");
+        }
+
+        canvas.onmouseup = () => {
+          //鼠标放开，停止画
+          painting = false;
+        };
+      };
+
+      //此时出现的矩形是模糊的，是因为canvas本身自带宽度
+      //若用css设置其宽高，在绘制时图像会伸缩以适应它的框架尺寸：如果CSS的尺寸与初始画布的比例不一致，它会出现扭曲
+      //解决办法：初始时直接设置其宽高为屏宽高，通过js获取屏幕宽高，直接googlejs设置宽高
     </script>
   </body>
 </html>

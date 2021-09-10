@@ -4,6 +4,8 @@
   box-sizing: border-box;
 }
 #canvas {
-  height: 100vh;
-  border: 1px solid red;
+  /* height: 100vh;
+  width: 100vm; 消除左右滚动条 */
+  /* border: 1px solid red; */
+  display: block; /*canvas内联元素，将其变为块级元素可消除上下滚动条*/
 }
