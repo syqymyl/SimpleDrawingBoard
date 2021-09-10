@@ -7,63 +7,84 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <!-- <div id="canvas"></div>
-    <script>
-      canvas.onmousemove = (e) => {
-        console.log(e.clientX);
-        console.log(e.clientY);
-        //console.log调试大法
-        let div = document.createElement("div"); //div在内存
-        div.style.position = "absolute";
-        div.style.left = e.clientX + "px";
-        div.style.top = e.clientY + "px";
-        // div.style.border = "1px solid red";
-        div.style.width = "6px";
-        div.style.height = "6px";
-        div.style.marginLeft = "-3px"; //使点击的位置位于方框中间
-        div.style.marginTop = "-3px";
-        div.style.borderRadius = "50%";
-        div.style.backgroundColor = "black";
-        canvas.appendChild(div); //将div添加到画布，使小方框显现出来
-      };
-    </script> -->
     <canvas id="canvas" width="300" height="150"></canvas>
     <script>
       let canvas = document.getElementById("canvas");
-      canvas.width = document.documentElement.clientWidth;
-      canvas.height = document.documentElement.clientHeight;
-      let ctx = canvas.getContext("2d");
-
-      let painting = false;
-
-      ctx.fillStyle = "red";
-      ctx.strokeStyle = "none";
-
-      canvas.onmousedown = () => {
-        //鼠标放下，可以开始画
-        painting = true;
-      };
-
-      canvas.onmousemove = (e) => {
-        if (painting === true) {
-          ctx.beginPath();
-          ctx.arc(e.clientX, e.clientY, 3, 0, 2 * Math.PI);
-          ctx.stroke();
-          ctx.fill();
-          // ctx.fillRect(e.clientX - 3, e.clientY - 3, 6, 6); //通过修改数据来判断该api功能
-        } else {
-          console.log("什么都不做");
-        }
-
-        canvas.onmouseup = () => {
-          //鼠标放开，停止画
-          painting = false;
-        };
-      };
-
       //此时出现的矩形是模糊的，是因为canvas本身自带宽度
       //若用css设置其宽高，在绘制时图像会伸缩以适应它的框架尺寸：如果CSS的尺寸与初始画布的比例不一致，它会出现扭曲
       //解决办法：初始时直接设置其宽高为屏宽高，通过js获取屏幕宽高，直接googlejs设置宽高
+      canvas.width = document.documentElement.clientWidth;
+      canvas.height = document.documentElement.clientHeight;
+
+      let ctx = canvas.getContext("2d");
+      ctx.fillStyle = "red";
+      ctx.strokeStyle = "none";
+      ctx.lineWidth = 10; //放大线宽度，发现线中间存在缝隙，用drawLine找原因
+      ctx.lineCap = "round";
+
+      let painting = false;
+      let last; //记住上一个画线的坐标作为下一个画线坐标的起点
+      function drawLine(x1, y1, x2, y2) {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      }
+      // drawLine(0, 0, 125, 125); //用于测试画线
+      // drawLine(125, 125, 300, 100); //发现有断裂，用圆补全断裂，搜索js line end round
+
+      var isTouchDevice = "ontouchstart" in document.documentElement;
+      if (isTouchDevice) {
+        //触屏，手机或ipad，利用红绿灯方法，看到红灯就停止，绿灯就通行，用一标志变量painting
+        canvas.ontouchstart = (e) => {
+          //用于获取画线起始点的坐标
+          let x = e.touches[0].clientX;
+          let y = e.touches[0].clientY;
+          last = [x, y];
+        };
+        canvas.ontouchmove = (e) => {
+          //思想：用console.log打印事件，查看console面板，发现touches有多个，源于手机可以多指触摸，数据储存在touches数组里，取touches[0]，找到坐标
+          //手机端不用像鼠标一样分鼠标放上和放下，手机离开屏幕自动停止作画
+          // console.log(e);
+          // let x = e.touches[0].clientX;
+          // let y = e.touches[0].clientY;
+          // console.log(x, y);
+          // ctx.beginPath();
+          // ctx.arc(x, y, 3, 0, 2 * Math.PI);
+          // ctx.stroke();
+          // ctx.fill();
+          let x = e.touches[0].clientX;
+          let y = e.touches[0].clientY;
+          drawLine(last[0], last[1], x, y);
+          last = [x, y];
+        };
+      } else {
+        //非触屏，为PC端，检测鼠标
+        canvas.onmousedown = (e) => {
+          //鼠标放下，可以开始画
+          painting = true;
+          last = [e.clientX, e.clientY]; //初始画线点坐标
+        };
+        // canvas.onmousemove(事件相关信息)，浏览器会调用
+        canvas.onmousemove = (e) => {
+          if (painting === true) {
+            drawLine(last[0], last[1], e.clientX, e.clientY);
+            last = [e.clientX, e.clientY]; //更新上一点坐标
+            // ctx.beginPath();
+            // ctx.arc(e.clientX, e.clientY, 3, 0, 2 * Math.PI);
+            // ctx.stroke();
+            // ctx.fill();
+            // ctx.fillRect(e.clientX - 3, e.clientY - 3, 6, 6); //通过修改数据来判断该api功能
+          } else {
+            console.log("什么都不做");
+          }
+
+          canvas.onmouseup = () => {
+            //鼠标放开，停止画
+            painting = false;
+          };
+        };
+      }
     </script>
   </body>
 </html>
